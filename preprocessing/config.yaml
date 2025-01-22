@@ -1,100 +1,111 @@
 objects:
   - name: "Ascaris lumbricoides"
     initial_name: "Ascaris lumbricoides"
+    bbox_color: [255, 0, 0]
     width:
       min_value: 45
       max_value: 75
     height:
       min_value: 35
       max_value: 50
-    id: 0
+    category_id: 0
   - name: "Capillaria philippinensis"
     initial_name: "Capillaria philippinensis"
+    bbox_color: [0, 255, 0]
     width:
       min_value: 35
       max_value: 45
     height:
       min_value: 20
       max_value: 25
-    id: 1
+    category_id: 1
   - name: "Enterobius vermicularis"
     initial_name: "Enterobius vermicularis"
+    bbox_color: [0, 0, 255]
     width:
       min_value: 50
       max_value: 60
     height:
       min_value: 20
       max_value: 30
-    id: 2
+    category_id: 2
   - name: "Fasciolopsis buski"
     initial_name: "Fasciolopsis buski"
+    bbox_color: [255, 0, 255]
     width:
       min_value: 130
       max_value: 140
     height:
       min_value: 80
       max_value: 85
-    id: 3
+    category_id: 3
   - name: "Hookworm"
     initial_name: "Hookworm egg"
+    bbox_color: [255, 255, 0]
     width:
       min_value: 40
       max_value: 60
     height:
       min_value: 40
       max_value: 60
-    id: 4
+    category_id: 4
   - name: "Hymenolepis diminuta"
     initial_name: "Hymenolepis diminuta"
+    bbox_color: [96, 96, 96]
     width:
       min_value: 65
       max_value: 75
     height:
       min_value: 45
       max_value: 55
-    id: 5
+    category_id: 5
   - name: "Hymenolepis nana"
     initial_name: "Hymenolepis nana"
+    bbox_color: [0, 255, 255]
     width:
       min_value: 30
       max_value: 50
     height:
       min_value: 30
       max_value: 50
-    id: 6
+    category_id: 6
   - name: "Opisthorchis viverrine"
-    initial: "Opisthorchis viverrine"
+    initial_name: "Opisthorchis viverrine"
+    bbox_color: [0, 0, 0]
     width:
       min_value: 25
       max_value: 35
     height:
       min_value: 5
       max_value: 15
-    id: 7
+    category_id: 7
   - name: "Paragonimus spp"
     initial_name: "Paragonimus spp"
+    bbox_color: [0, 102, 0]
     width:
       min_value: 80
       max_value: 120
     height:
       min_value: 50
       max_value: 60
-    id: 8
+    category_id: 8
   - name: "Taenia spp."
     initial_name: "Taenia spp. egg"
+    bbox_color: [102, 0, 51]
     width:
       min_value: 30
       max_value: 40
     height:
       min_value: 30
       max_value: 40
-    id: 9
+    category_id: 9
   - name: "Trichuris trichiura"
     initial_name: "Trichuris trichiura"
+    bbox_color: [102, 102, 0]
     width:
       min_value: 50
       max_value: 54
     height:
       min_value: 22
       max_value: 23
-    id: 10
+    category_id: 10
