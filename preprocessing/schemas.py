@@ -12,8 +12,8 @@ from common.utils import save_unserializable_json
 
 
 class CharacteristicValueSchema(BaseModel):
-    min_value: float = 0
-    max_value: float = 0
+    min_value: float = None
+    max_value: float = None
 
 
 class ObjectSchema(BaseModel):
