@@ -1,0 +1,10 @@
+.python-version
+.idea
+
+data/
+
+# Environments
+.env
+.venv
+env/
+venv/

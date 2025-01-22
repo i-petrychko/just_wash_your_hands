@@ -1,0 +1,100 @@
+objects:
+  - name: "Ascaris lumbricoides"
+    initial_name: "Ascaris lumbricoides"
+    width:
+      min_value: 45
+      max_value: 75
+    height:
+      min_value: 35
+      max_value: 50
+    id: 0
+  - name: "Capillaria philippinensis"
+    initial_name: "Capillaria philippinensis"
+    width:
+      min_value: 35
+      max_value: 45
+    height:
+      min_value: 20
+      max_value: 25
+    id: 1
+  - name: "Enterobius vermicularis"
+    initial_name: "Enterobius vermicularis"
+    width:
+      min_value: 50
+      max_value: 60
+    height:
+      min_value: 20
+      max_value: 30
+    id: 2
+  - name: "Fasciolopsis buski"
+    initial_name: "Fasciolopsis buski"
+    width:
+      min_value: 130
+      max_value: 140
+    height:
+      min_value: 80
+      max_value: 85
+    id: 3
+  - name: "Hookworm"
+    initial_name: "Hookworm egg"
+    width:
+      min_value: 40
+      max_value: 60
+    height:
+      min_value: 40
+      max_value: 60
+    id: 4
+  - name: "Hymenolepis diminuta"
+    initial_name: "Hymenolepis diminuta"
+    width:
+      min_value: 65
+      max_value: 75
+    height:
+      min_value: 45
+      max_value: 55
+    id: 5
+  - name: "Hymenolepis nana"
+    initial_name: "Hymenolepis nana"
+    width:
+      min_value: 30
+      max_value: 50
+    height:
+      min_value: 30
+      max_value: 50
+    id: 6
+  - name: "Opisthorchis viverrine"
+    initial: "Opisthorchis viverrine"
+    width:
+      min_value: 25
+      max_value: 35
+    height:
+      min_value: 5
+      max_value: 15
+    id: 7
+  - name: "Paragonimus spp"
+    initial_name: "Paragonimus spp"
+    width:
+      min_value: 80
+      max_value: 120
+    height:
+      min_value: 50
+      max_value: 60
+    id: 8
+  - name: "Taenia spp."
+    initial_name: "Taenia spp. egg"
+    width:
+      min_value: 30
+      max_value: 40
+    height:
+      min_value: 30
+      max_value: 40
+    id: 9
+  - name: "Trichuris trichiura"
+    initial_name: "Trichuris trichiura"
+    width:
+      min_value: 50
+      max_value: 54
+    height:
+      min_value: 22
+      max_value: 23
+    id: 10
