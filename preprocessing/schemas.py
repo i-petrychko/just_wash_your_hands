@@ -1,9 +1,10 @@
 import yaml
 from pydantic import BaseModel, model_validator, field_validator
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 from uuid import uuid4
 import sys
 import json
+from enum import Enum
 
 sys.path.append(".")
 
@@ -11,9 +12,16 @@ from preprocessing.settings import settings
 from common.utils import save_unserializable_json
 
 
+class Status(str, Enum):
+    PENDING = "Pending"
+    APPROVED = "Approved"
+    REJECTED = "Rejected"
+    REJECTED_AUTOMATICALLY = "Rejected_automatically"
+
+
 class CharacteristicValueSchema(BaseModel):
-    min_value: float = None
-    max_value: float = None
+    min_value: Optional[float] = None
+    max_value: Optional[float] = None
 
 
 class ObjectSchema(BaseModel):
@@ -82,14 +90,13 @@ class LabelSchema(BaseModel):
     object: ObjectSchema
     uuid: str = str(uuid4())
     image_shape: ImageShape
-    confidence: float = None
-    pixel_size: float = None
+    confidence: Optional[float] = None
+    pixel_size: Optional[float] = None
     coordinates: LabelCoordinatesSchema = None
     yolo_annotation: YoloCoordinatesSchema = None
-    num_vertices: int = None
-    relative_area: float = None
-    scaling_coef: float = None
-    filtered_manually: bool = False
+    num_vertices: Optional[int] = None
+    relative_area: Optional[float] = None
+    scaling_coef: Optional[float] = None
 
     @model_validator(mode="after")
     def calculate_yolo_and_area(cls, values):
@@ -115,6 +122,7 @@ class LabelSchema(BaseModel):
 
 class ImageLabelSchema(BaseModel):
     img_path: str
+    status: Status = Status.PENDING
     labels: List[LabelSchema]
 
     def save_to_json(self, path: str):
@@ -122,10 +130,10 @@ class ImageLabelSchema(BaseModel):
             json.dump(self.model_dump(), file, indent=4)
 
     @classmethod
-    def read_from_json(cls, path: str):
-        with open(path, "r") as file:
-            data = json.load(file)
-        return cls.model_validate(data)  # Validate and reconstruct the object from JSON
+    def from_dict(cls, labels: dict):
+        return cls.model_validate(
+            labels
+        )  # Validate and reconstruct the object from JSON
 
 
 class PreprocessingSchema(BaseModel):

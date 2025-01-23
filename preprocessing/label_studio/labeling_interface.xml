@@ -1,0 +1,27 @@
+<View>
+  <View style="display: flex; justify-content: space-between;">
+    <View style="width: 80%;">
+      <Header value="Ground Truth"/>
+      <Image name="gt_image" value="$image" zoom="true"/>
+      <RectangleLabels name="gt_labels" toName="gt_image" choice="multiple">
+        <Label value="Ascaris lumbricoides" background="#FFCC00"/>
+        <Label value="Capillaria philippinensis" background="#FF9900"/>
+        <Label value="Enterobius vermicularis" background="#FF6600"/>
+        <Label value="Fasciolopsis buski" background="#FF3300"/>
+        <Label value="Hookworm" background="#FF0000"/>
+        <Label value="Hymenolepis diminuta" background="#CC0000"/>
+        <Label value="Hymenolepis nana" background="#990000"/>
+        <Label value="Opisthorchis viverrine" background="#660000"/>
+        <Label value="Paragonimus spp" background="#330000"/>
+        <Label value="Taenia spp." background="#000000"/>
+      </RectangleLabels>
+    </View>
+  </View>
+  <Text name="iou" value="IoU: $iou"/>
+  <Text name="confidence" value="Confidence: $confidence" />
+  <Text name="model" value="Model: $model" />
+  <Choices name="action" toName="gt_image" choice="single-radio" required="true">
+    <Choice value="Approve" />
+    <Choice value="Reject"/>
+  </Choices>
+</View>
