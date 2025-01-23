@@ -1,7 +1,9 @@
 .python-version
 .idea
 
-data/
+data/icip
+data/dataset/images
+data/dataset/targets
 
 # Environments
 .env
