@@ -1,5 +1,7 @@
 .python-version
 .idea
+.DS_Store
+__pycache__
 
 data/icip
 data/dataset/images
