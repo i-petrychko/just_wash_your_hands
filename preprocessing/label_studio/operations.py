@@ -21,6 +21,9 @@ def convert_image_labels_to_label_studio():
         label_studio_labels, f"{settings.data_path}/label_studio_labels.json"
     )
 
+def filter_dataset():
+    pass
+
 
 if __name__ == "__main__":
     convert_image_labels_to_label_studio()
