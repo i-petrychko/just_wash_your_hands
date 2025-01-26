@@ -22,6 +22,10 @@ def get_latest_labels_version():
     return int(labels_files[-1].split("_")[-1].split(".")[0])
 
 
+def get_target_img_path(img_path):
+    return img_path.replace("images", "targets")
+
+
 def get_latest_labels_json():
 
     labels_dir_path = f"{settings.data_path}/labels"
