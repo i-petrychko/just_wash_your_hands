@@ -1,6 +1,8 @@
 import json
 import sys
 import os
+import numpy as np
+from scipy.stats import truncnorm
 
 sys.path.append(".")
 
@@ -24,6 +26,34 @@ def get_latest_labels_version():
 
 def get_target_img_path(img_path):
     return img_path.replace("images", "targets")
+
+
+def sample_truncated_normal(
+    min_val: float, max_val: float, std_dev: float, size: int = 1
+):
+    """
+    Sample values from a truncated normal distribution.
+
+    Args:
+        min_val (float): The minimum value of the distribution.
+        max_val (float): The maximum value of the distribution.
+        mean (float): The mean of the normal distribution.
+        std_dev (float): The standard deviation of the normal distribution.
+        size (int): Number of samples to generate.
+
+    Returns:
+        np.ndarray: Array of sampled values.
+    """
+    # Compute the lower and upper bounds in standard normal units
+    mean = max_val - min_val
+    lower_bound = (min_val - mean) / std_dev
+    upper_bound = (max_val - mean) / std_dev
+
+    # Generate samples from the truncated normal distribution
+    samples = truncnorm.rvs(
+        lower_bound, upper_bound, loc=mean, scale=std_dev, size=size
+    )
+    return samples
 
 
 def get_latest_labels_json():

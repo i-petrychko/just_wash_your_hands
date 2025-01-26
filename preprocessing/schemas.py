@@ -314,6 +314,7 @@ class ImageLabelSchema(BaseModel):
     img_path: str
     status: Status = Status.PENDING
     labels: List[LabelSchema]
+    scaling_cf: Optional[float] = None
 
     def save_to_json(self, path: str):
         with open(path, "w") as file:

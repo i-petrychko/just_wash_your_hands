@@ -31,8 +31,8 @@ filtering:
         use_empty_txt: false
         min_relative_area: 0
         max_relative_area: 1
-        min_scaling_cf: -inf
-        max_scaling_cf: +inf
+        min_scaling_cf: 0.6
+        max_scaling_cf: 1.5
       val_set:
         use_empty_txt: false
         min_relative_area: 0

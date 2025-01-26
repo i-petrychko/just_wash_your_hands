@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict
 from pydantic import BaseModel, Field
 
 
@@ -43,6 +43,19 @@ class FilteringConfig(BaseModel):
     categories: Optional[List[CategoryConfig]] = Field(
         default=[], description="List of category configurations"
     )
+
+    def get_set_config_dict(self, set_type: str) -> Dict[str, DatasetSubsetConfig]:
+        set_config_dict = {}
+
+        for category in self.categories:
+            if category.name:
+                # Using getattr to dynamically get the set type (train_set, val_set, test_set)
+                subset_config = getattr(category, set_type, None)
+
+                if subset_config:
+                    set_config_dict[category.name] = subset_config
+
+        return set_config_dict
 
 
 # Schema for preprocessing configuration
