@@ -1,9 +1,12 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional, Any, Union
 import sys
+from enum import Enum
 
 
 sys.path.append(".")
+
+from common.utils import read_json
 
 from preprocessing.schemas import (
     ImageLabelSchema,
@@ -21,7 +24,7 @@ class Data(BaseModel):
     iou: float = 0.0
     gt_iou: float = 0.0
     confidence: float = 0.0
-    model: str = None
+    model: Optional[str] = None
     status: Status = Status.PENDING
 
 
@@ -30,14 +33,20 @@ class Value(BaseModel):
     y: float
     width: float
     height: float
+    rotation: Optional[int] = 0
     rectanglelabels: List[str]
 
 
 class Result(BaseModel):
+    original_width: Optional[int] = None
+    original_height: Optional[int] = None
+    image_rotation: Optional[int] = None
+    value: Value
+    id: Optional[str] = None
     from_name: str
     to_name: str
     type: str = "rectanglelabels"
-    value: Value
+    origin: Optional[str] = None
 
 
 class Prediction(BaseModel):
@@ -102,6 +111,129 @@ class Label(BaseModel):
         return cls(data=data, predictions=predictions)
 
 
+class Choice(str, Enum):
+    REJECT = "Reject"
+    APPROVE = "Approve"
+
+
+class Choices(BaseModel):
+    choices: List[Choice]
+
+
+class ResultOutput1(BaseModel):
+    value: Choices
+    id: str
+    from_name: str
+    to_name: str
+    type: str
+    origin: str
+
+
+class PredictionOutput(BaseModel):
+    id: int
+    result: List[Result]
+    model_version: str
+    created_ago: str
+    score: Optional[int] = None
+    cluster: Optional[int] = None
+    neighbors: Optional[int] = None
+    mislabeling: float
+    created_at: str
+    updated_at: str
+    model: Optional[str] = None
+    model_run: Optional[int] = None
+    task: int
+    project: int
+
+
+class Annotation(BaseModel):
+    id: int
+    completed_by: int
+    result: List[Union[Result, ResultOutput1]] = []
+    was_cancelled: bool
+    ground_truth: bool
+    created_at: str
+    updated_at: str
+    draft_created_at: Optional[str] = None
+    lead_time: float
+    prediction: PredictionOutput
+    result_count: int
+    unique_id: str
+    import_id: Optional[int]
+    last_action: Optional[str]
+    task: int
+    project: int
+    updated_by: int
+    parent_prediction: int
+    parent_annotation: Optional[int]
+    last_created_by: Optional[int]
+
+
+class FilteredOutput(BaseModel):
+    id: int
+    annotations: List[Annotation]
+    file_upload: str
+    drafts: List
+    predictions: List[int]
+    data: Data
+    meta: dict
+    created_at: str
+    updated_at: str
+    inner_id: int
+    total_annotations: int
+    cancelled_annotations: int
+    total_predictions: int
+    comment_count: int
+    unresolved_comment_count: int
+    last_comment_updated_at: Optional[Any] = None
+    project: int
+    updated_by: int
+    comment_authors: List
+
+    @classmethod
+    def from_dict(cls, filtered_output: dict):
+
+        return cls(**filtered_output)
+
+
+class FilteredLabel(BaseModel):
+    id: int
+    img_path: str
+    results: List[Result]
+    predictions: List[Result]
+    choice: Choice
+
+    @classmethod
+    def from_filtered_output(cls, filtered_output: FilteredOutput):
+
+        id = filtered_output.id
+        img_path = filtered_output.data.img_path
+        results = [
+            result
+            for annotation in filtered_output.annotations
+            for result in annotation.result
+            if isinstance(result, Result)
+        ]
+        predictions = [
+            prediction_result
+            for annotation in filtered_output.annotations
+            for prediction_result in annotation.prediction.result
+        ]
+        choice = [
+            result.value.choices[0]
+            for annotation in filtered_output.annotations
+            for result in annotation.result
+            if isinstance(result, ResultOutput1)
+        ][0]
+        return cls(
+            id=id,
+            img_path=img_path,
+            results=results,
+            predictions=predictions,
+            choice=choice,
+        )
+
+
 if __name__ == "__main__":
     example_image_schema = ImageLabelSchema(
         img_path=f"data/dataset/images/0.jpg",
@@ -115,3 +247,10 @@ if __name__ == "__main__":
     )
 
     print(Label.from_image_label(example_image_schema))
+
+    filtered_json_output = read_json(
+        "preprocessing/label_studio/results/Paragonimus_spp_all.json"
+    )
+    filtered_output = FilteredOutput.from_dict(filtered_json_output[0])
+    filtered_label = FilteredLabel.from_filtered_output(filtered_output)
+    print(filtered_label)

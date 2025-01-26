@@ -22,7 +22,7 @@ def get_image_with_targets(image_labels: ImageLabelSchema) -> np.ndarray:
             label.coordinates.max_x,
             label.coordinates.max_y,
         )
-        text = f"{label.object.name} {str(label.confidence) + '%' if label.confidence is not None else ''}"
+        text = f"{label.object.name} {str(label.confidence) + '%' if label.confidence is not None else ''} {image_labels.status}"
         color = label.object.bbox_color
 
         cv2.rectangle(image, (x_min, y_min), (x_max, y_max), color, 5)
