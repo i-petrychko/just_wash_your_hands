@@ -20,6 +20,7 @@ class Choice(str, Enum):
 class Status(str, Enum):
     PENDING = "Pending"
     APPROVED = "Approved"
+    APPROVED_AUTOMATICALLY = "Approved automatically"
     REJECTED = "Rejected"
     REJECTED_AUTOMATICALLY = "Rejected automatically"
 

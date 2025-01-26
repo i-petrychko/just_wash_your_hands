@@ -1,0 +1,49 @@
+version: 1.0
+preprocessing:
+  out_channels: 3
+  out_dim:
+    - 1280
+    - 1280
+  pixel_size: 0.2506 # if set, images will be scaled to actual sizes in microns
+
+paths:
+  dataset_path: "data/dataset"
+  out_path: "run/${version}"
+
+split:
+  seed: 1
+  type: "stratified" # available: stratified
+  ratio:
+    - 0.8
+    - 0.0
+    - 0.2
+
+filtering:
+  label_statuses:
+#    - "Pending"
+    - "Approved"
+#    - "Rejected"
+#    - "Approved automatically"
+#    - "Rejected automatically"
+  categories:
+    - name: "Paragonimus spp"
+      train_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+        min_scaling_cf: -inf
+        max_scaling_cf: +inf
+      val_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+        min_scaling_cf: -inf
+        max_scaling_cf: +inf
+      test_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+        min_scaling_cf: -inf
+        max_scaling_cf: +inf
+
+
