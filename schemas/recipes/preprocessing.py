@@ -1,4 +1,4 @@
-from typing import List, Optional, Union, Dict
+from typing import List, Optional, Union, Dict, Tuple
 from pydantic import BaseModel, Field
 
 
@@ -63,7 +63,7 @@ class PreprocessingConfig(BaseModel):
     out_channels: Optional[int] = Field(
         None, description="Number of output channels for preprocessing"
     )
-    out_dim: Optional[List[int]] = Field(
+    out_dim: Tuple[int, int] = Field(
         None, description="Output dimensions of the image (width, height)"
     )
     pixel_size: Optional[float] = Field(

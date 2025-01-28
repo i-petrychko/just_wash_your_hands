@@ -128,6 +128,23 @@ class LabelCoordinatesSchema(BaseModel):
             min_x=int(x), max_x=int(x + width), min_y=int(y), max_y=int(y + height)
         )
 
+    def __mul__(self, factor: float):
+        """
+        Scales the bounding box coordinates by a given factor.
+
+        Parameters:
+            factor (float): The scaling factor.
+
+        Returns:
+            LabelCoordinatesSchema: A new instance with scaled coordinates.
+        """
+        return LabelCoordinatesSchema(
+            min_x=int(self.min_x * factor),
+            max_x=int(self.max_x * factor),
+            min_y=int(self.min_y * factor),
+            max_y=int(self.max_y * factor),
+        )
+
 
 class Data(BaseModel):
     image: str  # label studio format path
@@ -185,6 +202,28 @@ class LabelSchema(BaseModel):
             values.relative_area = width * height
 
         return values
+
+    def update_yolo_and_area(self):
+        if self.coordinates and self.image_shape:
+            # Calculate YOLO annotation
+            mid_x = (
+                (self.coordinates.min_x + self.coordinates.max_x) / 2
+            ) / self.image_shape.width
+            mid_y = (
+                (self.coordinates.min_y + self.coordinates.max_y) / 2
+            ) / self.image_shape.height
+            width = (
+                self.coordinates.max_x - self.coordinates.min_x
+            ) / self.image_shape.width
+            height = (
+                self.coordinates.max_y - self.coordinates.min_y
+            ) / self.image_shape.height
+
+            # Update YOLO annotation and relative area
+            self.yolo_annotation = YoloCoordinatesSchema(
+                mid_x=mid_x, mid_y=mid_y, width=width, height=height
+            )
+            self.relative_area = width * height
 
 
 class Choices(BaseModel):
