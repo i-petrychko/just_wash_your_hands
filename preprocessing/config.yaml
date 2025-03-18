@@ -80,7 +80,7 @@ objects:
       max_value: 15
     category_id: 7
   - name: "Paragonimus spp"
-    initial_name: "Paragonimus spp"
+    initial_name: "Paragonimus"
     bbox_color: [0, 102, 0]
     width:
       min_value: 80

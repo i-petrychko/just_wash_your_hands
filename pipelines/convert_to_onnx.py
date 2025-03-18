@@ -69,8 +69,8 @@ def filter_labels(
     return filtered_labels
 
 
-def save_labels_in_yolo_format(label: ImageLabelSchema, save_path: str):
-    pass
+def save_labels_in_yolo_format(labels: List[ImageLabelSchema], config: Config, set_name: str):
+    return
 
 
 def scale_image(
@@ -158,6 +158,7 @@ def preprocess_image(
     image_label: ImageLabelSchema, config: Config
 ) -> (ImageLabelSchema, np.ndarray):
 
+    # TODO: update image shape
     image_label = copy.deepcopy(image_label)
     scaling_cf = image_label.scaling_cf
 
@@ -258,6 +259,14 @@ def main(config: Config):
     preprocessed_train_image_labels = preprocess_and_save_images(
         filtered_train_labels, config, "train", True
     )
+
+    save_unserializable_json(preprocessed_test_image_labels, f"{config.paths.out_path}/preprocessed_test.json")
+    save_unserializable_json(preprocessed_val_image_labels, f"{config.paths.out_path}/preprocessed_val.json")
+    save_unserializable_json(preprocessed_train_image_labels, f"{config.paths.out_path}/preprocessed_train.json")
+
+    save_labels_in_yolo_format(preprocessed_test_image_labels, config, "test")
+    save_labels_in_yolo_format(preprocessed_val_image_labels, config, "val")
+    save_labels_in_yolo_format(preprocessed_train_image_labels, config, "train")
 
 
 if __name__ == "__main__":
