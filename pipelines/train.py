@@ -1,14 +1,17 @@
 import sys
 import argparse
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+from tools.train import main as rtdetr_main
+from src.misc import WandBLogger
 
-sys.path.append(".")
+def main(args):
 
-from third_party.RT_DETR.rtdetr_pytorch.tools.train import main as rtdetr_main
-
+    
+    rtdetr_main(args)
 
 
 if __name__ == '__main__':
-
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', '-c', type=str, )
     parser.add_argument('--resume', '-r', type=str, )
@@ -18,4 +21,4 @@ if __name__ == '__main__':
     parser.add_argument('--seed', type=int, help='seed',)
     args = parser.parse_args()
 
-    rtdetr_main(args)
+    main(args)
