@@ -5,14 +5,14 @@ import numpy as np
 import os
 
 class WandBLogger:
-    def __init__(self, project_name=None, config=None, entity=None):
+    def __init__(self, name=None, project_name=None, config=None, entity=None):
         """Initialize WandB logger
         Args:
             project_name (str): Name of the project
             config (dict): Configuration parameters
             entity (str): WandB username or team name
         """
-        self.run = wandb.init(project=project_name, config=config, entity=entity)
+        self.run = wandb.init(name=name, project=project_name, config=config, entity=entity)
         
     def log_metrics(self, metrics, step=None):
         """Log training/validation metrics

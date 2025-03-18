@@ -39,6 +39,7 @@ class YAMLConfig(BaseConfig):
         #wandb
         self.wandb_project_name :str = cfg.get('wandb', dict()).get('project_name', None)
         self.wandb_entity :str = cfg.get('wandb', dict()).get('entity', None)
+        self.wandb_name :str = cfg.get('wandb', dict()).get('name', None)
 
 
     @property

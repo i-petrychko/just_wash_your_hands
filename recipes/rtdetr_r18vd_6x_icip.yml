@@ -51,3 +51,4 @@ optimizer:
 wandb:
   project_name: RT-DETR
   entity: petrychko-vitalii-ukrainian-catholic-university
+  name: rtdetr_r18vd_6x_icip
