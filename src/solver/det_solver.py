@@ -39,19 +39,38 @@ class DetSolver(BaseSolver):
                 args.clip_max_norm, print_freq=args.log_step, ema=self.ema, scaler=self.scaler, wandb_logger=self.wandb_logger)
 
             self.lr_scheduler.step()
-            
-            if self.output_dir:
-                checkpoint_paths = [self.output_dir / 'checkpoint.pth']
-                # extra checkpoint before LR drop and every 100 epochs
-                if (epoch + 1) % args.checkpoint_step == 0:
-                    checkpoint_paths.append(self.output_dir / f'checkpoint{epoch:04}.pth')
-                for checkpoint_path in checkpoint_paths:
-                    dist.save_on_master(self.state_dict(epoch), checkpoint_path)
+        
+                
 
             module = self.ema.module if self.ema else self.model
             test_stats, coco_evaluator = evaluate(
                 module, self.criterion, self.postprocessor, self.val_dataloader, base_ds, self.device, self.output_dir
             )
+
+            if self.output_dir:
+                # Save latest checkpoint
+                latest_path = self.output_dir / 'checkpoint_latest.pth'
+                dist.save_on_master(self.state_dict(epoch), latest_path)
+                if self.wandb_logger is not None:
+                    self.wandb_logger.upload_checkpoint(str(latest_path))
+                
+                # Save periodic checkpoint
+                if (epoch + 1) % args.checkpoint_step == 0:
+                    checkpoint_path = self.output_dir / f'checkpoint{epoch:04}.pth'
+                    dist.save_on_master(self.state_dict(epoch), checkpoint_path)
+                    
+                    if self.wandb_logger is not None:
+                        self.wandb_logger.upload_checkpoint(str(checkpoint_path))
+                
+                # Save best checkpoint based on mAP
+                if test_stats is not None and 'bbox' in coco_evaluator.coco_eval:
+                    current_map = coco_evaluator.coco_eval['bbox'].stats[0]
+                    if not hasattr(self, 'best_map') or current_map > self.best_map:
+                        self.best_map = current_map
+                        best_path = self.output_dir / 'checkpoint_best.pth'
+                        dist.save_on_master(self.state_dict(epoch), best_path)
+                        if self.wandb_logger is not None:
+                            self.wandb_logger.upload_checkpoint(str(best_path))
 
             # TODO 
             for k in test_stats.keys():
@@ -66,8 +85,12 @@ class DetSolver(BaseSolver):
             # Log metrics to wandb
             if self.wandb_logger is not None:
                 # Log training metrics
-                wandb_train_stats = {f"Train/{k}": v for k, v in train_stats.items() if k in ['lr', 'loss', 'loss_vfl', 'loss_bbox', 'loss_giou']}
+                wandb_train_stats = {f"Train/{k}": v for k, v in train_stats.items() if k in ['loss', 'loss_vfl', 'loss_bbox', 'loss_giou']}
                 self.wandb_logger.log_metrics(wandb_train_stats, step=epoch)
+
+                wandb_lr_stats = {f"LR/{k}": v for k, v in train_stats.items() if k in ['lr']}
+                self.wandb_logger.log_metrics(wandb_lr_stats, step=epoch)
+
 
                 # Log validation metrics
                 if test_stats is not None:
@@ -113,6 +136,8 @@ class DetSolver(BaseSolver):
                         for name in filenames:
                             torch.save(coco_evaluator.coco_eval["bbox"].eval,
                                     self.output_dir / "eval" / name)
+                                
+                        
                             
 
 

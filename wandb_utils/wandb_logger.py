@@ -88,26 +88,20 @@ class WandBLogger:
             
             wandb.log({"predictions": wandb.Image(img, boxes=boxes_data)})
     
-    def log_checkpoint(self, checkpoint_path, aliases=None):
-        """Save model checkpoint to wandb
+    def upload_checkpoint(self, checkpoint_path):
+        """Save model checkpoint file to wandb run directory
         Args:
-            checkpoint_path (str): Path to checkpoint file
-            aliases (list): List of aliases for the artifact
+            checkpoint_path (str): Path to checkpoint file 
+            filename (str): Name of the checkpoint file (optional)
         """
         if not os.path.exists(checkpoint_path):
+            print(f"Warning: Checkpoint path {checkpoint_path} does not exist")
             return
             
-        artifact = wandb.Artifact(
-            name=f"model-{wandb.run.id}",
-            type="model",
-            description="Model checkpoint"
+        # Upload checkpoint directly to wandb
+        self.run.save(
+            str(checkpoint_path)
         )
-        artifact.add_file(checkpoint_path)
-        
-        if aliases:
-            self.run.log_artifact(artifact, aliases=aliases)
-        else:
-            self.run.log_artifact(artifact)
     
     def log_bad_predictions(self, images, pred_boxes, pred_labels, pred_scores,
                           gt_boxes, gt_labels, iou_threshold=0.5):

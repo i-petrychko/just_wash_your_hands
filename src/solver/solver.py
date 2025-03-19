@@ -16,7 +16,8 @@ from wandb_utils.wandb_logger import WandBLogger
 class BaseSolver(object):
     def __init__(self, cfg: BaseConfig) -> None:
         
-        self.cfg = cfg 
+        self.cfg = cfg
+        self.best_map = 0
 
     def setup(self, ):
         '''Avoid instantiating unnecessary classes 
