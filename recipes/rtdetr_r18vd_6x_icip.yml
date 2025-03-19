@@ -5,10 +5,11 @@ __include__: [
   'include/dataloader.yml',
   'include/optimizer.yml',
   'include/rtdetr_r50vd.yml',
+  'preprocessing/default.yml'
 ]
 
 
-output_dir: ./output/rtdetr_r18vd_6x_icip
+output_dir: ./run_output/
 
 PResNet:
   depth: 18
@@ -51,6 +52,7 @@ optimizer:
 wandb:
   project_name: RT-DETR
   entity: petrychko-vitalii-ukrainian-catholic-university
-  name: rtdetr_r18vd_6x_icip
+  name: test_run
 
 checkpoint_step: 10
+seed: 1

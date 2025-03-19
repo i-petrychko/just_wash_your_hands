@@ -13,3 +13,4 @@ data/dataset/targets
 .venv
 env/
 venv/
+/data

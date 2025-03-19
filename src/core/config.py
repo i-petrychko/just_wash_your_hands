@@ -78,6 +78,8 @@ class BaseConfig(object):
         self.wandb_project_name :str = None
         self.wandb_entity :str = None
 
+        self.seed :int = 1
+
 
     @property
     def model(self, ) -> nn.Module:

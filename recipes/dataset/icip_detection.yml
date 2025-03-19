@@ -7,8 +7,8 @@ train_dataloader:
   type: DataLoader
   dataset: 
     type: CocoDetection
-    img_folder: ./data/test_icip/train/
-    ann_file: ./data/test_icip/annotations/instances_train.json
+    img_folder: ./data/icip/train/
+    ann_file: ./data/icip/annotations/train.json
     transforms:
       type: Compose
       ops: ~
@@ -22,8 +22,8 @@ val_dataloader:
   type: DataLoader
   dataset: 
     type: CocoDetection
-    img_folder: ./data/test_icip/val/
-    ann_file: ./data/test_icip/annotations/instances_val.json
+    img_folder: ./data/icip/val/
+    ann_file: ./data/icip/annotations/val.json
     transforms:
       type: Compose
       ops: ~ 
