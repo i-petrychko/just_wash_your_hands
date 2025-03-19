@@ -9,7 +9,6 @@ import argparse
 import src.misc.dist as dist 
 from src.core import YAMLConfig 
 from src.solver import TASKS
-from wandb_utils.wandb_logger import WandBLogger
 
 
 def main(args, ) -> None:
@@ -30,20 +29,11 @@ def main(args, ) -> None:
     )
 
     solver = TASKS[cfg.yaml_cfg['task']](cfg)
-
-    wandb_logger = WandBLogger(
-        name=cfg.wandb_name,
-        project_name=cfg.wandb_project_name,
-        config=cfg.yaml_cfg,
-        entity=cfg.wandb_entity
-    )
     
-    # if args.test_only:
-    #     solver.val()
-    # else:
-    #     solver.fit()
-
-    wandb_logger.finish()
+    if args.test_only:
+        solver.val()
+    else:
+        solver.fit()
 
 
 if __name__ == '__main__':

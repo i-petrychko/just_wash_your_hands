@@ -177,7 +177,7 @@ def main(args, ):
         output = model(im_data, orig_size)
         labels, boxes, scores = output
         
-    draw([im_pil], labels, boxes, scores, 0.6)
+    draw([im_pil], labels, boxes, scores, 0.3)
   
 if __name__ == '__main__':
     import argparse

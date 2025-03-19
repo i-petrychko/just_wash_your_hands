@@ -36,7 +36,7 @@ class DetSolver(BaseSolver):
             
             train_stats = train_one_epoch(
                 self.model, self.criterion, self.train_dataloader, self.optimizer, self.device, epoch,
-                args.clip_max_norm, print_freq=args.log_step, ema=self.ema, scaler=self.scaler)
+                args.clip_max_norm, print_freq=args.log_step, ema=self.ema, scaler=self.scaler, wandb_logger=self.wandb_logger)
 
             self.lr_scheduler.step()
             
@@ -62,12 +62,42 @@ class DetSolver(BaseSolver):
                     best_stat['epoch'] = epoch
                     best_stat[k] = test_stats[k][0]
             print('best_stat: ', best_stat)
+            
+            # Log metrics to wandb
+            if self.wandb_logger is not None:
+                # Log training metrics
+                wandb_train_stats = {f"Train/{k}": v for k, v in train_stats.items() if k in ['lr', 'loss', 'loss_vfl', 'loss_bbox', 'loss_giou']}
+                self.wandb_logger.log_metrics(wandb_train_stats, step=epoch)
 
+                # Log validation metrics
+                if test_stats is not None:
+
+                    if 'bbox' in coco_evaluator.coco_eval:
+                        bbox_eval = coco_evaluator.coco_eval['bbox']
+                        stats = bbox_eval.stats
+                        
+                        # Log mAP at different IoU thresholds
+                        wandb_coco_stats = {
+                            'Val/mAP': stats[0],  # mAP at IoU=0.50:0.95
+                            'Val/mAP_50': stats[1],  # mAP at IoU=0.50
+                            'Val/mAP_75': stats[2],  # mAP at IoU=0.75
+                            'Val/mAP_small': stats[3],  # mAP for small objects
+                            'Val/mAP_medium': stats[4],  # mAP for medium objects
+                            'Val/mAP_large': stats[5],  # mAP for large objects
+                            'Val/AR_1': stats[6],  # AR at maxDets=1
+                            'Val/AR_10': stats[7],  # AR at maxDets=10
+                            'Val/AR_100': stats[8],  # AR at maxDets=100
+                            'Val/AR_small': stats[9],  # AR for small objects
+                            'Val/AR_medium': stats[10],  # AR for medium objects
+                            'Val/AR_large': stats[11],  # AR for large objects
+                        }
+                        self.wandb_logger.log_metrics(wandb_coco_stats, step=epoch)
 
             log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
                         **{f'test_{k}': v for k, v in test_stats.items()},
                         'epoch': epoch,
                         'n_parameters': n_parameters}
+            
 
             if self.output_dir and dist.is_main_process():
                 with (self.output_dir / "log.txt").open("a") as f:
@@ -83,10 +113,13 @@ class DetSolver(BaseSolver):
                         for name in filenames:
                             torch.save(coco_evaluator.coco_eval["bbox"].eval,
                                     self.output_dir / "eval" / name)
+                            
+
 
         total_time = time.time() - start_time
         total_time_str = str(datetime.timedelta(seconds=int(total_time)))
         print('Training time {}'.format(total_time_str))
+        self.finish()
 
 
     def val(self, ):
@@ -100,5 +133,7 @@ class DetSolver(BaseSolver):
                 
         if self.output_dir:
             dist.save_on_master(coco_evaluator.coco_eval["bbox"].eval, self.output_dir / "eval.pth")
+
+        self.finish()
         
         return

@@ -10,6 +10,7 @@ from typing import Dict
 
 from src.misc import dist
 from src.core import BaseConfig
+from wandb_utils.wandb_logger import WandBLogger
 
 
 class BaseSolver(object):
@@ -39,6 +40,13 @@ class BaseSolver(object):
 
         self.output_dir = Path(cfg.output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
+
+        self.wandb_logger = WandBLogger(
+            name=cfg.wandb_name,
+            project_name=cfg.wandb_project_name,
+            config=cfg.yaml_cfg,
+            entity=cfg.wandb_entity
+        )
 
 
     def train(self, ):
@@ -180,3 +188,6 @@ class BaseSolver(object):
 
     def val(self, ):
         raise NotImplementedError('')
+    
+    def finish(self, ):
+        self.wandb_logger.finish()
