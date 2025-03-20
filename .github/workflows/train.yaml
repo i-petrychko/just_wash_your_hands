@@ -101,11 +101,6 @@ jobs:
 
     steps:
 
-      - name: Download system packages
-        run: |
-
-
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -115,17 +110,21 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Download python packages
-        run: |
-
-
-      - name: Inference
+      - name: Train model
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
-          
+          conda create -n rtdetr -y python=3.10 pip
+          conda activate rtdetr
+          conda install pytorch==2.0.1 pytorch-cuda=12.1 -c pytorch -c nvidia
+          pip install -r train_requirements.txt
+          pip install transformers
+
+          dvc pull data
+
+          python pipelines/train.py -c recipes/rtdetr_r18vd_6x_icip.yml -t https://github.com/lyuwenyu/storage/releases/download/v0.1/rtdetr_r18vd_5x_coco_objects365_from_paddle.pth
 
 
   delete-runner:
