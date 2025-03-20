@@ -72,7 +72,6 @@ jobs:
                           --instance-type ${{ inputs.instance_type }} \
                           --key-name ${{ secrets.AWS_KEY_NAME }} \
                           --security-group-ids ${{ secrets.AWS_SECURITY_GROUP_ID }} \
-                          --subnet-id ${{ secrets.AWS_SUBNET_ID }} \
                           --associate-public-ip-address \
                           --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=github-thesis-training-runner}]' \
                           --user-data file://aws/startup_substituted.sh \
@@ -127,7 +126,7 @@ jobs:
           export HOME=/tmp_home
           echo "Configuring credentials..."
           wandb login $WANDB_KEY
-          
+
           dvc pull data
 
           python pipelines/train.py -c recipes/rtdetr_r18vd_6x_icip.yml -t https://github.com/lyuwenyu/storage/releases/download/v0.1/rtdetr_r18vd_5x_coco_objects365_from_paddle.pth
