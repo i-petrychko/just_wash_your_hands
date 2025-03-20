@@ -1,4 +1,4 @@
 [core]
     remote = myremote
 ['remote "myremote"']
-    url = s3://thesis-icip-dvc/files/
+    url = s3://thesis-data-dvc/files/

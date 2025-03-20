@@ -1,8 +1,8 @@
 
 __include__: [
-  'dataset/icip_detection.yml',
+  'dataset/default.yml',
   'runtime/runtime.yml',
-  'include/dataloader.yml',
+  'include/default_dataloader.yml',
   'include/optimizer.yml',
   'include/rtdetr_r50vd.yml',
   'preprocessing/default.yml'

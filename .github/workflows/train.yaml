@@ -1,0 +1,168 @@
+name: Run train on aws with checkpoint
+
+
+on:
+  workflow_dispatch:
+    inputs:
+      config_name:
+        description: 'Configuration name for generating params'
+        required: true
+        default: 'initial_config'
+      run_name:
+        description: 'Name of the run'
+        required: true
+        default: 'Experiment'
+      instance_type:
+        description: 'example: "g6.2xlarge", "t2.2xlarge" etc'
+        required: true
+        default: "g6.2xlarge"
+
+
+
+run-name: "${{ inputs.run_name }} on aws ${{ inputs.instance_type }}"
+
+
+jobs:
+
+  register-runner:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install software
+        run: |
+          sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Retrieve Runner Token
+        env:
+          GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
+        run: |
+          echo "Getting runner token..."
+          TOKEN=$(curl -L -X POST --http1.1 \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GIT_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/i-petrychko/just_wash_your_hands/actions/runners/registration-token" | jq -r .token)
+          
+          if [ -z "$TOKEN" ] || [ "$TOKEN" == "null" ]; then
+            echo "Failed to retrieve token"
+            exit 1
+          fi
+          echo "TOKEN=${TOKEN}"
+          echo "TOKEN=${TOKEN}" >> $GITHUB_ENV
+
+      - name: Deploy instance and register Runner
+        id: register_instance
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          echo "Configuring EC2 instance using $TOKEN git token"
+          
+          echo "Substituting env variables to the startup file"
+          envsubst < aws/startup.sh > aws/startup_substituted.sh
+          
+          instance_id=$(aws ec2 run-instances \
+                          --image-id ${{ secrets.AWS_IMAGE_ID }} \
+                          --count 1 \
+                          --instance-type ${{ inputs.instance_type }} \
+                          --key-name ${{ secrets.AWS_KEY_NAME }} \
+                          --security-group-ids ${{ secrets.AWS_SECURITY_GROUP_ID }} \
+                          --subnet-id ${{ secrets.AWS_SUBNET_ID }} \
+                          --associate-public-ip-address \
+                          --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=github-thesis-training-runner}]' \
+                          --user-data file://aws/startup_substituted.sh \
+                          --block-device-mappings '[{
+                              "DeviceName": "/dev/sda1",
+                              "Ebs": {
+                                  "VolumeSize": 300,
+                                  "VolumeType": "gp3",
+                                  "DeleteOnTermination": true
+                              }
+                          }]' | jq -r '.Instances[0].InstanceId')
+          
+          echo "Registered runner with instance ID: $instance_id"
+          echo "$instance_id" > instance_id
+
+      - name: Produce instance id Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: instance_id
+          path: instance_id
+
+  train-model:
+    needs: [register-runner]
+    runs-on: [self-hosted, training-runner]
+    timeout-minutes: 5000
+
+    steps:
+
+      - name: Download system packages
+        run: |
+
+
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Download python packages
+        run: |
+
+
+      - name: Inference
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          
+
+
+  delete-runner:
+    runs-on: ubuntu-latest
+    needs: [ register-runner, train-model ]
+    if: always()
+
+    steps:
+      - name: Download Instance ID Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: instance_id
+
+      - name: Delete EC2 Instance
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          echo "Deleting EC2 instance..."
+          
+          # Fetch instance ID from the artifact
+          instance_id=$(cat instance_id)
+          echo "extracted instance id: $instance_id"
+          
+          # Stop the instance
+          echo "Stopping instance with ID $instance_id..."
+          aws ec2 stop-instances --region "$AWS_REGION" --instance-ids "$instance_id"
+          
+          # Wait for the instance to stop
+          aws ec2 wait instance-stopped --region "$AWS_REGION" --instance-ids "$instance_id"
+          echo "Instance $instance_id has been stopped."
+          
+          # Terminate the instance
+          echo "Terminating instance with ID $instance_id..."
+          aws ec2 terminate-instances --region "$AWS_REGION" --instance-ids "$instance_id"
+          
+          # Wait for the instance to terminate
+          aws ec2 wait instance-terminated --region "$AWS_REGION" --instance-ids "$instance_id"
+          echo "Instance $instance_id has been terminated successfully."
