@@ -6,6 +6,6 @@ numpy<2.0.0
 pycocotools
 PyYAML
 scipy
-transformers
+transformers==4.39
 dvc-s3
 wandb

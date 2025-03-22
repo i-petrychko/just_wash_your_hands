@@ -126,9 +126,8 @@ jobs:
           
           conda create -n rtdetr -y python=3.10 pip
           conda activate rtdetr
-          pip install torch==2.0.1 torchvision==0.15.2 --index-url https://download.pytorch.org/whl/cu121
+          conda install pytorch=2.0.1 torchvision=0.15.2 pytorch-cuda=11.8 -c pytorch -c nvidia
           pip install -r train_requirements.txt
-          pip install transformers
 
 
           echo "Configuring credentials..."
