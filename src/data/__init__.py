@@ -1,4 +1,8 @@
 
+from PIL import Image
+
+Image.MAX_IMAGE_PIXELS = None
+
 from .coco import *
 from .cifar10 import CIFAR10
 
