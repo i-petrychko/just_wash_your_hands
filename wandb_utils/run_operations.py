@@ -1,4 +1,5 @@
 import wandb
+import os
 from omegaconf import OmegaConf
 
 
@@ -34,13 +35,28 @@ def upload_dir(run_id, project_name, entity_name, dir_path, base_path=None):
     run = api.run(f"{entity_name}/{project_name}/{run_id}")
     run.save(dir_path, base_path=base_path)
 
+
+def upload_file(run_id, project_name, entity_name, file_path):
+    api = wandb.Api()
+    run = api.run(f"{entity_name}/{project_name}/{run_id}")
+    
+    run.upload_file(file_path)
+
+def upload_directory(run_id, project_name, entity_name, path_to_directory):
+
+    if os.path.exists(path_to_directory) and os.path.isdir(path_to_directory):
+        for root, dirs, files in os.walk(path_to_directory):
+            for file in files:
+                file_path = os.path.join(root, file)
+                upload_file(run_id, project_name, entity_name, file_path)
+    else:
+        print(f"Directory '{path_to_directory}' does not exist.")
+
     
 
 if __name__ == "__main__":
-    run_id = get_run_id("recipes/rtdetr_r18vd_6x_icip.yml")
-    print(run_id)
-
-    download_file(run_id, "RT-DETR", "petrychko-vitalii-ukrainian-catholic-university", "run_output/checkpoint_latest.pth", "test_download")
+    val_path = "test_validation"
+    upload_directory("2bnwcd14", "RT-DETR", "petrychko-vitalii-ukrainian-catholic-university", val_path)
 
 
 

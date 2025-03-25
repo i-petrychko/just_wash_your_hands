@@ -8,7 +8,7 @@ from models.rt_detr_model import RTDETRModel
 from validation.validation import validate_predictions
 from validation.utils import convert_coco_to_image_predictions, extract_image_paths
 from models.base_model import ImagePrediction
-from wandb_utils.run_operations import get_run_id, download_file, upload_dir
+from wandb_utils.run_operations import get_run_id, download_file, upload_directory
 from src.core import YAMLConfig 
 
 def main():
@@ -76,7 +76,7 @@ def main():
         gt_labels, predictions, args.iou_threshold, args.min_confidence, f"{output_dir}/val"
     )
 
-    upload_dir(run_id, cfg.wandb_project_name, cfg.wandb_entity_name, output_dir)
+    upload_directory(run_id, cfg.wandb_project_name, cfg.wandb_entity_name, output_dir)
 
 
 
