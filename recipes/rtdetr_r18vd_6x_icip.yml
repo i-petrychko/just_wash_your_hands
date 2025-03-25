@@ -9,7 +9,7 @@ __include__: [
 ]
 
 
-output_dir: ./run_output/
+output_dir: ./run_output
 
 PResNet:
   depth: 18
