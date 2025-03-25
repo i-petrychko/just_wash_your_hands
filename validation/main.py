@@ -32,19 +32,19 @@ def main():
     download_file(
         run_id,
         cfg.wandb_project_name,
-        cfg.wandb_entity_name,
+        cfg.wandb_entity,
         f"{cfg.output_dir}/checkpoint_best.pth",
         download_dir,
     )
     download_file(
         run_id,
         cfg.wandb_project_name,
-        cfg.wandb_entity_name,
+        cfg.wandb_entity,
         "train.json",
         download_dir,
     )
     download_file(
-        run_id, cfg.wandb_project_name, cfg.wandb_entity_name, "val.json", download_dir
+        run_id, cfg.wandb_project_name, cfg.wandb_entity, "val.json", download_dir
     )
 
     model = RTDETRModel(args.model_config, f"{download_dir}/checkpoint_best.pth")
@@ -97,7 +97,7 @@ def main():
         f"{output_dir}/val",
     )
 
-    upload_directory(run_id, cfg.wandb_project_name, cfg.wandb_entity_name, output_dir)
+    upload_directory(run_id, cfg.wandb_project_name, cfg.wandb_entity, output_dir)
 
 
 if __name__ == "__main__":
