@@ -50,7 +50,7 @@ def main():
     model = RTDETRModel(args.model_config, f"{download_dir}/{cfg.output_dir}/checkpoint_best.pth")
 
     # train validation
-    img_paths = extract_image_paths(f"{download_dir}/train.json")
+    img_paths = extract_image_paths(f"{download_dir}/train.json", imgs_dir=cfg.train_dataloader.dataset.img_folder)
     predictions = model.predict(img_paths, args.iou_threshold, args.min_confidence)
     ## save predictions to output directory
     with open(f"{output_dir}/train/predictions.json", "w") as f:
@@ -63,7 +63,7 @@ def main():
         predictions = json.load(f)
     ## convert predictions to ImagePrediction objects
     predictions = [ImagePrediction.from_dict(prediction) for prediction in predictions]
-    gt_labels = convert_coco_to_image_predictions(data)
+    gt_labels = convert_coco_to_image_predictions(data, imgs_dir=cfg.train_dataloader.dataset.img_folder)
     # run validation
     validate_predictions(
         gt_labels,
@@ -74,7 +74,7 @@ def main():
     )
 
     # val validation
-    img_paths = extract_image_paths(f"{download_dir}/val.json")
+    img_paths = extract_image_paths(f"{download_dir}/val.json", imgs_dir=cfg.val_dataloader.dataset.img_folder)
     predictions = model.predict(img_paths, args.iou_threshold, args.min_confidence)
     ## save predictions to output directory
     with open(f"{output_dir}/val/predictions.json", "w") as f:
@@ -87,7 +87,7 @@ def main():
         predictions = json.load(f)
     ## convert predictions to ImagePrediction objects
     predictions = [ImagePrediction.from_dict(prediction) for prediction in predictions]
-    gt_labels = convert_coco_to_image_predictions(data)
+    gt_labels = convert_coco_to_image_predictions(data, imgs_dir=cfg.val_dataloader.dataset.img_folder)
     # run validation
     validate_predictions(
         gt_labels,

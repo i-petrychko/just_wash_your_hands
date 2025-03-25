@@ -8,17 +8,17 @@ from models.base_model import ImagePrediction
 from validation.constants import NO_PARASITE_CLASS
 
 
-def extract_image_paths(dataset_labels_path: str) -> List[str]:
+def extract_image_paths(dataset_labels_path: str, imgs_dir: str) -> List[str]:
     # dataset_labels_path is a json file with labels in coco format
     with open(dataset_labels_path, "r") as f:
         data = json.load(f)
     return [
-        f"data/icip/val/{os.path.join(data['images'][i]['file_name'])}"
+        f"{imgs_dir}/{os.path.join(data['images'][i]['file_name'])}"
         for i in range(len(data["images"]))
     ]
 
 
-def convert_coco_to_image_predictions(data: dict) -> List[ImagePrediction]:
+def convert_coco_to_image_predictions(data: dict, imgs_dir: str) -> List[ImagePrediction]:
     # Create a mapping from image_id to ImagePrediction
     image_predictions = {}
 
@@ -28,7 +28,7 @@ def convert_coco_to_image_predictions(data: dict) -> List[ImagePrediction]:
             labels=[],
             normalized_cxcywhs=[],
             confidences=[],  # For ground truth, all confidences will be 1.0
-            img_path=f"data/icip/val/{image['file_name']}",
+            img_path=f"{imgs_dir}/{image['file_name']}",
         )
 
     # Process annotations
