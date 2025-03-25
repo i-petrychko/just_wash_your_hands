@@ -9,7 +9,8 @@ from validation.validation import validate_predictions
 from validation.utils import convert_coco_to_image_predictions, extract_image_paths
 from models.base_model import ImagePrediction
 from wandb_utils.run_operations import get_run_id, download_file, upload_directory
-from src.core import YAMLConfig 
+from src.core import YAMLConfig
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -20,7 +21,6 @@ def main():
 
     output_dir = "validation_results"
 
-
     cfg = YAMLConfig(args.model_config)
     os.makedirs(output_dir, exist_ok=True)
     os.makedirs(f"{output_dir}/train", exist_ok=True)
@@ -29,10 +29,23 @@ def main():
     run_id = get_run_id(args.model_config)
     download_dir = f"{run_id}_files"
     os.makedirs(download_dir, exist_ok=True)
-    download_file(run_id, cfg.wandb_project_name, cfg.wandb_entity_name, f"{cfg.output_dir}/checkpoint_best.pth", download_dir)
-    download_file(run_id, cfg.wandb_project_name, cfg.wandb_entity_name, "train.json", download_dir)
-    download_file(run_id, cfg.wandb_project_name, cfg.wandb_entity_name, "val.json", download_dir)
-
+    download_file(
+        run_id,
+        cfg.wandb_project_name,
+        cfg.wandb_entity_name,
+        f"{cfg.output_dir}/checkpoint_best.pth",
+        download_dir,
+    )
+    download_file(
+        run_id,
+        cfg.wandb_project_name,
+        cfg.wandb_entity_name,
+        "train.json",
+        download_dir,
+    )
+    download_file(
+        run_id, cfg.wandb_project_name, cfg.wandb_entity_name, "val.json", download_dir
+    )
 
     model = RTDETRModel(args.model_config, f"{download_dir}/checkpoint_best.pth")
 
@@ -53,7 +66,11 @@ def main():
     gt_labels = convert_coco_to_image_predictions(data)
     # run validation
     validate_predictions(
-        gt_labels, predictions, args.iou_threshold, args.min_confidence, f"{output_dir}/train"
+        gt_labels,
+        predictions,
+        args.iou_threshold,
+        args.min_confidence,
+        f"{output_dir}/train",
     )
 
     # val validation
@@ -73,11 +90,14 @@ def main():
     gt_labels = convert_coco_to_image_predictions(data)
     # run validation
     validate_predictions(
-        gt_labels, predictions, args.iou_threshold, args.min_confidence, f"{output_dir}/val"
+        gt_labels,
+        predictions,
+        args.iou_threshold,
+        args.min_confidence,
+        f"{output_dir}/val",
     )
 
     upload_directory(run_id, cfg.wandb_project_name, cfg.wandb_entity_name, output_dir)
-
 
 
 if __name__ == "__main__":

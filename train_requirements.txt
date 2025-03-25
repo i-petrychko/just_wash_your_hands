@@ -9,3 +9,5 @@ scipy
 transformers==4.39
 dvc-s3
 wandb
+scikit-learn
+seaborn
