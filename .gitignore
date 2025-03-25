@@ -3,6 +3,8 @@
 .DS_Store
 __pycache__
 github_token.txt
+1.py
+commands.txt
 
 data/icip
 data/dataset/images

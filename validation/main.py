@@ -47,7 +47,7 @@ def main():
         run_id, cfg.wandb_project_name, cfg.wandb_entity, "val.json", download_dir
     )
 
-    model = RTDETRModel(args.model_config, f"{download_dir}/checkpoint_best.pth")
+    model = RTDETRModel(args.model_config, f"{download_dir}/{cfg.output_dir}/checkpoint_best.pth")
 
     # train validation
     img_paths = extract_image_paths(f"{download_dir}/train.json")
