@@ -1,4 +1,4 @@
-name: Run train on aws
+name: Run validation on aws
 
 
 on:
@@ -8,14 +8,14 @@ on:
         description: 'Configuration file name'
         required: true
         default: 'default'
-      checkpoint_name:
-        description: 'Checkpoint name for training'
+      iou_threshold:
+        description: 'IoU threshold'
         required: true
-        default: 'rtdetr_r18vd_5x_coco_objects365_from_paddle.pth'
-      run_name:
-        description: 'Name of the run'
+        default: 0.5
+      min_confidence:
+        description: 'Minimum confidence'
         required: true
-        default: 'Experiment'
+        default: 0.1
       instance_type:
         description: 'example: "g6.2xlarge", "t2.2xlarge" etc'
         required: true
@@ -23,7 +23,7 @@ on:
 
 
 
-run-name: "${{ inputs.run_name }} on aws ${{ inputs.instance_type }}"
+run-name: "${{ inputs.config_name }} validation on aws ${{ inputs.instance_type }}"
 
 
 jobs:
@@ -97,7 +97,7 @@ jobs:
           name: instance_id
           path: instance_id
 
-  train-model:
+  validate-model:
     needs: [register-runner]
     runs-on: [self-hosted, training-runner]
     timeout-minutes: 5000
@@ -113,7 +113,7 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Train model
+      - name: Validate model
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -137,17 +137,18 @@ jobs:
           echo "Configuring credentials..."
           wandb login $WANDB_KEY
 
-          dvc pull checkpoints
+          echo "Pulling data..."
           dvc pull data
 
-          python pipelines/train.py -c recipes/${{ github.event.inputs.config_name }}.yml -t checkpoints/${{ github.event.inputs.checkpoint_name }}
+          echo "Running validation..."
+          python validation/main.py --model_config recipes/${{ github.event.inputs.config_name }}.yml --iou_threshold ${{ inputs.iou_threshold }} --min_confidence ${{ inputs.min_confidence }}
 
           
 
 
   delete-runner:
     runs-on: ubuntu-latest
-    needs: [ register-runner, train-model ]
+    needs: [ register-runner, validate-model ]
     if: always()
 
     steps:

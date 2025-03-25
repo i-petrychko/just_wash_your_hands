@@ -1,6 +1,7 @@
 """by lyuwenyu
 """
 
+import os
 import torch 
 import torch.nn as nn 
 
@@ -48,6 +49,9 @@ class BaseSolver(object):
             config=cfg.yaml_cfg,
             entity=cfg.wandb_entity
         )
+
+        self.wandb_logger.upload_file(cfg.train_dataloader.dataset.ann_file, base_path=os.path.basename(cfg.train_dataloader.dataset.ann_file))
+        self.wandb_logger.upload_file(cfg.val_dataloader.dataset.ann_file, base_path=os.path.basename(cfg.val_dataloader.dataset.ann_file))
 
 
     def train(self, ):

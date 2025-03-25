@@ -102,6 +102,22 @@ class WandBLogger:
         self.run.save(
             str(checkpoint_path)
         )
+
+    def upload_file(self, file_path, base_path=None):
+        """Upload file to wandb run directory
+        Args:
+            file_path (str): Path to file 
+        """
+        if not os.path.exists(file_path):
+            print(f"Warning: File path {file_path} does not exist")
+            return
+            
+        # Upload checkpoint directly to wandb
+        self.run.save(
+            str(file_path),
+            base_path=base_path
+        )
+    
     
     def log_bad_predictions(self, images, pred_boxes, pred_labels, pred_scores,
                           gt_boxes, gt_labels, iou_threshold=0.5):

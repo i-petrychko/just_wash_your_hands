@@ -52,7 +52,7 @@ optimizer:
 wandb:
   project_name: RT-DETR
   entity: petrychko-vitalii-ukrainian-catholic-university
-  name: test_run
+  name: r18vd_6x_default
 
 checkpoint_step: 10
 seed: 1

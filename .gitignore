@@ -14,3 +14,4 @@ data/dataset/targets
 env/
 venv/
 /data
+/checkpoints
