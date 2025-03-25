@@ -16,6 +16,14 @@ on:
         description: 'Name of the run'
         required: true
         default: 'Experiment'
+      iou_threshold:
+        description: 'IoU threshold'
+        required: true
+        default: 0.5
+      min_confidence:
+        description: 'Minimum confidence'
+        required: true
+        default: 0.1
       instance_type:
         description: 'example: "g6.2xlarge", "t2.2xlarge" etc'
         required: true
@@ -141,6 +149,8 @@ jobs:
           dvc pull data
 
           python pipelines/train.py -c recipes/${{ github.event.inputs.config_name }}.yml -t checkpoints/${{ github.event.inputs.checkpoint_name }}
+
+          python validation/main.py --model_config recipes/${{ github.event.inputs.config_name }}.yml --iou_threshold ${{ inputs.iou_threshold }} --min_confidence ${{ inputs.min_confidence }}
 
           
 

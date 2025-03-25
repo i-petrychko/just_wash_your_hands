@@ -1,0 +1,21 @@
+__include__: [
+  'dataset/icip_detection.yml',
+  'runtime/runtime.yml',
+  'include/dataloader.yml',
+  'include/optimizer.yml',
+  'include/rtdetr_r50vd.yml',
+  'preprocessing/default.yml'
+]
+
+output_dir: ./run_output
+
+
+wandb:
+  project_name: RT-DETR
+  entity: petrychko-vitalii-ukrainian-catholic-university
+  name: r50vd_6x_icip
+
+checkpoint_step: 50
+seed: 1
+
+epoches: 100
