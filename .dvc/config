@@ -1,2 +1,4 @@
+[core]
+    remote = data
 ['remote "data"']
     url = s3://thesis-data-dvc/files/
