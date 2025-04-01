@@ -1,17 +1,15 @@
 import json
 import sys
 import os
-import numpy as np
 from scipy.stats import truncnorm
 
 sys.path.append(".")
 
-from preprocessing.settings import settings
-
+DATA_PATH = "data"
 
 def get_latest_labels_version():
 
-    labels_dir_path = f"{settings.data_path}/labels"
+    labels_dir_path = f"{DATA_PATH}/labels"
     labels_files = list(
         filter(
             lambda filename: filename.startswith("labels_version")
@@ -58,7 +56,7 @@ def sample_truncated_normal(
 
 def get_latest_labels_json():
 
-    labels_dir_path = f"{settings.data_path}/labels"
+    labels_dir_path = f"{DATA_PATH}/labels"
     labels_files = list(
         filter(
             lambda filename: filename.startswith("labels_version")
@@ -73,7 +71,7 @@ def get_latest_labels_json():
 
 def get_latest_label_studio_labels_json():
 
-    labels_dir_path = f"{settings.data_path}/labels"
+    labels_dir_path = f"{DATA_PATH}/labels"
     labels_files = list(
         filter(
             lambda filename: filename.startswith("label_studio_labels_version")

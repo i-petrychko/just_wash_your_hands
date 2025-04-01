@@ -4,7 +4,7 @@ import sys
 
 sys.path.append(".")
 
-from preprocessing.schemas import (
+from schemas.labels import (
     ImageLabelSchema,
     LabelSchema,
     LabelCoordinatesSchema,

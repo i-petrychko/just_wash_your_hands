@@ -1,20 +1,14 @@
 version: 1.0
-preprocessing:
-  out_channels: 3
-  out_dim:
-    - 640
-    - 640
-  pixel_size: 0.2506 # if set, images will be scaled to actual sizes in microns
 
 paths:
-  dataset_path: "data/dataset"
+  dataset_path: "data/icip"
+  out_path: "run"
 
-split:
+train_split:
   type: "stratified" # available: stratified
   ratio:
     - 0.8
     - 0.2
-    - 0.0
 
 filtering:
   label_statuses:
@@ -24,24 +18,157 @@ filtering:
    - "Approved automatically"
    - "Rejected automatically"
   categories:
-    - name: "Paragonimus spp"
+    - name: "Ascaris lumbricoides"
+      id: 0
       train_set:
         use_empty_txt: false
         min_relative_area: 0
         max_relative_area: 1
-        min_scaling_cf: 0.1
-        max_scaling_cf: 10
       val_set:
         use_empty_txt: false
         min_relative_area: 0
         max_relative_area: 1
-        min_scaling_cf: 0.1
-        max_scaling_cf: 10
       test_set:
         use_empty_txt: false
         min_relative_area: 0
         max_relative_area: 1
-        min_scaling_cf: 0.1
-        max_scaling_cf: 10
-
-
+    - name: "Capillaria philippinensis"
+      id: 1
+      train_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+      val_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+      test_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+    - name: "Enterobius vermicularis"
+      id: 2
+      train_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+      val_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+      test_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+    - name: "Fasciolopsis buski"
+      id: 3
+      train_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+      val_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+      test_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+    - name: "Hookworm"
+      id: 4
+      train_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+      val_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+      test_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+    - name: "Hymenolepis diminuta"
+      id: 5
+      train_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+      val_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+      test_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+    - name: "Hymenolepis nana"
+      id: 6
+      train_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+      val_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+      test_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+    - name: "Opisthorchis viverrine"
+      id: 7
+      train_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+      val_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+      test_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+    - name: "Paragonimus spp"
+      id: 8
+      train_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+      val_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+      test_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+    - name: "Taenia spp."
+      id: 9
+      train_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+      val_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+      test_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+    - name: "Trichuris trichiura"
+      id: 10
+      train_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+      val_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1
+      test_set:
+        use_empty_txt: false
+        min_relative_area: 0
+        max_relative_area: 1

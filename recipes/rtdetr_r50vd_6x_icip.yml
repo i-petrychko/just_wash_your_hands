@@ -8,7 +8,19 @@ __include__: [
 ]
 
 output_dir: ./run_output
+paths:
+  dataset_path: "data/icip"
+  out_path: "run"
 
+train_dataloader: 
+  dataset: 
+    img_folder: .
+    ann_file: ./run/coco/annotations/train.json
+
+val_dataloader:
+  dataset: 
+    img_folder: .
+    ann_file: ./run/coco/annotations/val.json
 
 wandb:
   project_name: RT-DETR

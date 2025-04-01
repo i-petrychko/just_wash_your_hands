@@ -11,3 +11,4 @@ dvc-s3
 wandb
 scikit-learn
 seaborn
+opencv-python

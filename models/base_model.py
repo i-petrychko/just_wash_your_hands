@@ -24,7 +24,7 @@ class ImagePrediction:
             labels=data["labels"],
             normalized_cxcywhs=data["normalized_cxcywhs"],
             confidences=data["confidences"],
-            img_path=data["img_path"],
+            img_path=data["img_path"].replace("//", "/"),
         )
 
 

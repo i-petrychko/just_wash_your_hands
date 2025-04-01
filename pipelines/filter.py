@@ -2,15 +2,16 @@ import os
 import sys
 from omegaconf import OmegaConf
 from typing import List
+import argparse
 
 sys.path.append(".")
 
 
-from preprocessing.schemas import ImageLabelSchema
-from schemas.recipes.preprocessing import Config
+from schemas.labels import ImageLabelSchema
+from schemas.preprocessing import Config
 from common.utils import (
-    get_latest_labels_json,
     save_unserializable_json,
+    read_json,
     sample_truncated_normal,
 )
 
@@ -88,31 +89,61 @@ def get_scaled_labels(image_labels: List[ImageLabelSchema], pixel_size: float):
     return image_labels
 
 
-def main(config: Config):
+def main(args):
 
-    labels_json = get_latest_labels_json()
-    labels = [ImageLabelSchema.from_dict(label_json) for label_json in labels_json]
-    output_dir = config.paths.out_path
-    os.makedirs(output_dir, exist_ok=True)
-
-    labels = filter_by_status(labels, config.filtering.label_statuses)
-
-    labels = filter_by_categories(
-        labels, [category.name for category in config.filtering.categories]
-    )
-
-    if config.preprocessing.pixel_size is not None:
-        labels = get_scaled_labels(labels, config.preprocessing.pixel_size)
-
-    save_unserializable_json(labels, f"{output_dir}/filtered.json")
-
-
-if __name__ == "__main__":
-
-    preprocessing_config_path = "src/recipes/preprocessing/default.yaml"
-    config = OmegaConf.load(preprocessing_config_path)
+    config = OmegaConf.load(args.config_path)
 
     config = OmegaConf.to_container(config, resolve=True)
     config = Config(**config)
 
-    main(config)
+    output_dir = config.paths.out_path
+    os.makedirs(f"{output_dir}/filtered", exist_ok=True)
+    # train set
+    labels_json = read_json(f"{config.paths.out_path}/splits/train.json")
+    labels = [ImageLabelSchema.from_dict(label_json) for label_json in labels_json]
+    labels = filter_by_status(labels, config.filtering.label_statuses)
+    labels = filter_by_categories(
+        labels, [category.name for category in config.filtering.categories]
+    )
+
+    if config.preprocessing is not None and config.preprocessing.pixel_size is not None:
+        labels = get_scaled_labels(labels, config.preprocessing.pixel_size)
+
+    save_unserializable_json(labels, f"{output_dir}/filtered/train.json")
+
+    # val set
+    labels_json = read_json(f"{config.paths.out_path}/splits/val.json")
+    labels = [ImageLabelSchema.from_dict(label_json) for label_json in labels_json]
+    labels = filter_by_status(labels, config.filtering.label_statuses)
+    labels = filter_by_categories(
+        labels, [category.name for category in config.filtering.categories]
+    )
+
+    if config.preprocessing is not None and config.preprocessing.pixel_size is not None:
+        labels = get_scaled_labels(labels, config.preprocessing.pixel_size)
+
+    save_unserializable_json(labels, f"{output_dir}/filtered/val.json")
+
+    # test set
+    labels_json = read_json(f"{config.paths.out_path}/splits/test.json")
+    labels = [ImageLabelSchema.from_dict(label_json) for label_json in labels_json]
+    labels = filter_by_status(labels, config.filtering.label_statuses)
+    labels = filter_by_categories(
+        labels, [category.name for category in config.filtering.categories]
+    )
+
+    if config.preprocessing is not None and config.preprocessing.pixel_size is not None:
+        labels = get_scaled_labels(labels, config.preprocessing.pixel_size)
+
+    save_unserializable_json(labels, f"{output_dir}/filtered/test.json")
+
+
+
+if __name__ == "__main__":
+
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config_path', '-c', type=str, default="config.yaml")
+    args = parser.parse_args()
+
+    main(args)

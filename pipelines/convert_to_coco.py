@@ -4,15 +4,17 @@ from typing import List, Tuple
 import numpy as np
 import copy
 import os
+import argparse
 
 import sys
 
 sys.path.append(".")
 
-from preprocessing.schemas import ImageLabelSchema, LabelCoordinatesSchema
-from schemas.recipes.preprocessing import Config, DatasetSubsetConfig
-from common.utils import save_unserializable_json, read_json
+from schemas.labels import ImageLabelSchema, LabelCoordinatesSchema
+from schemas.preprocessing import Config, DatasetSubsetConfig
+from common.utils import save_unserializable_json, read_json, save_json
 from common.visualizations import get_image_with_targets
+from pipelines.utils import convert_image_labels_to_coco
 
 
 def filter_preprocessed_labels_by_scaling_cf(
@@ -69,13 +71,9 @@ def filter_labels(
     return filtered_labels
 
 
-def save_labels_in_yolo_format(labels: List[ImageLabelSchema], config: Config, set_name: str):
-    return
-
-
 def scale_image(
     image_label: ImageLabelSchema, image: np.ndarray, scaling_cf: float
-) -> (ImageLabelSchema, np.ndarray):
+) -> Tuple[ImageLabelSchema, np.ndarray]:
     scaled_image = cv2.resize(
         image,
         dsize=(0, 0),
@@ -91,7 +89,11 @@ def scale_image(
 
 def pad_image(
     image_label: ImageLabelSchema, image: np.ndarray, out_dim: Tuple[int, int]
-) -> (ImageLabelSchema, np.ndarray):
+) -> Tuple[ImageLabelSchema, np.ndarray]:
+    
+    if out_dim is None:
+        return image_label, image
+    
     height, width, channels = image.shape
 
     out_height, out_width = out_dim
@@ -120,7 +122,10 @@ def pad_image(
 
 def crop_image(
     image_label: ImageLabelSchema, image: np.ndarray, out_dim: Tuple[int, int]
-) -> (ImageLabelSchema, np.ndarray):
+) -> Tuple[ImageLabelSchema, np.ndarray]:
+    
+    if out_dim is None:
+        return image_label, image
 
     x_min = min([label.coordinates.min_x for label in image_label.labels])
     y_min = min([label.coordinates.min_y for label in image_label.labels])
@@ -156,7 +161,7 @@ def crop_image(
 
 def preprocess_image(
     image_label: ImageLabelSchema, config: Config
-) -> (ImageLabelSchema, np.ndarray):
+) -> Tuple[ImageLabelSchema, np.ndarray]:
 
     # TODO: update image shape
     image_label = copy.deepcopy(image_label)
@@ -167,7 +172,7 @@ def preprocess_image(
         print(f"Image at {image_label.img_path} could not be loaded.")
         return
 
-    if config.preprocessing.out_channels == 1:
+    if config.preprocessing is not None and config.preprocessing.out_channels == 1:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     if scaling_cf is not None:
@@ -186,7 +191,7 @@ def preprocess_and_save_images(
 ) -> List[ImageLabelSchema]:
 
     preprocessed_image_labels = []
-    dest_images_dir_path = f"{config.paths.out_path}/yolo_dataset/images/{set_name}"
+    dest_images_dir_path = f"{config.paths.out_path}/coco/{set_name}"
     os.makedirs(dest_images_dir_path, exist_ok=True)
 
     for image_label in image_labels:
@@ -210,11 +215,22 @@ def preprocess_and_save_images(
     return preprocessed_image_labels
 
 
-def main(config: Config):
+def main(args):
 
-    test_image_labels_json = read_json(f"{config.paths.out_path}/test.json")
-    val_image_labels_json = read_json(f"{config.paths.out_path}/val.json")
-    train_image_labels_json = read_json(f"{config.paths.out_path}/train.json")
+    config = OmegaConf.load(args.config_path)
+
+    config = OmegaConf.to_container(config, resolve=True)
+    config = Config(**config)
+
+    output_final_labels_path = f"{config.paths.out_path}/final"
+    output_coco_path = f"{config.paths.out_path}/coco"
+    os.makedirs(output_final_labels_path, exist_ok=True)
+    os.makedirs(output_coco_path, exist_ok=True)
+    os.makedirs(f"{output_coco_path}/annotations", exist_ok=True)
+
+    test_image_labels_json = read_json(f"{config.paths.out_path}/filtered/test.json")
+    val_image_labels_json = read_json(f"{config.paths.out_path}/filtered/val.json")
+    train_image_labels_json = read_json(f"{config.paths.out_path}/filtered/train.json")
 
     test_image_labels = [
         ImageLabelSchema.from_dict(test_image_label_json)
@@ -229,7 +245,7 @@ def main(config: Config):
         for train_image_label_json in train_image_labels_json
     ]
 
-    if config.preprocessing.pixel_size is not None:
+    if config.preprocessing is not None and config.preprocessing.pixel_size is not None:
         skip_scaling_cf = False
     else:
         skip_scaling_cf = True
@@ -251,29 +267,33 @@ def main(config: Config):
     )
 
     preprocessed_test_image_labels = preprocess_and_save_images(
-        filtered_test_labels, config, "test", True
+        filtered_test_labels, config, "test", False
     )
     preprocessed_val_image_labels = preprocess_and_save_images(
-        filtered_val_labels, config, "val", True
+        filtered_val_labels, config, "val", False
     )
     preprocessed_train_image_labels = preprocess_and_save_images(
-        filtered_train_labels, config, "train", True
+        filtered_train_labels, config, "train", False
     )
 
-    save_unserializable_json(preprocessed_test_image_labels, f"{config.paths.out_path}/preprocessed_test.json")
-    save_unserializable_json(preprocessed_val_image_labels, f"{config.paths.out_path}/preprocessed_val.json")
-    save_unserializable_json(preprocessed_train_image_labels, f"{config.paths.out_path}/preprocessed_train.json")
+    save_unserializable_json(preprocessed_test_image_labels, f"{output_final_labels_path}/test.json")
+    save_unserializable_json(preprocessed_val_image_labels, f"{output_final_labels_path}/val.json")
+    save_unserializable_json(preprocessed_train_image_labels, f"{output_final_labels_path}/train.json")
 
-    save_labels_in_yolo_format(preprocessed_test_image_labels, config, "test")
-    save_labels_in_yolo_format(preprocessed_val_image_labels, config, "val")
-    save_labels_in_yolo_format(preprocessed_train_image_labels, config, "train")
+    coco_json = convert_image_labels_to_coco(preprocessed_test_image_labels)
+    save_json(coco_json, f"{output_coco_path}/annotations/test.json")
+
+    coco_json = convert_image_labels_to_coco(preprocessed_val_image_labels)
+    save_json(coco_json, f"{output_coco_path}/annotations/val.json")
+
+    coco_json = convert_image_labels_to_coco(preprocessed_train_image_labels)
+    save_json(coco_json, f"{output_coco_path}/annotations/train.json")
 
 
 if __name__ == "__main__":
-    preprocessing_config_path = "src/recipes/preprocessing/default.yaml"
-    config = OmegaConf.load(preprocessing_config_path)
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config_path', '-c', type=str, default="config.yaml")
+    args = parser.parse_args()
 
-    config = OmegaConf.to_container(config, resolve=True)
-    config = Config(**config)
-
-    main(config)
+    main(args)
