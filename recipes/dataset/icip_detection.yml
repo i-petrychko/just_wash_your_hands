@@ -32,3 +32,18 @@ val_dataloader:
   batch_size: 8
   num_workers: 4
   drop_last: False
+
+test_dataloader:
+  type: DataLoader
+  dataset: 
+    type: CocoDetection
+    img_folder: ./data/icip/test/
+    ann_file: ./data/icip/annotations/test.json
+    transforms:
+      type: Compose
+      ops: ~ 
+
+  shuffle: False
+  batch_size: 8
+  num_workers: 4
+  drop_last: False

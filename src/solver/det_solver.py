@@ -43,8 +43,12 @@ class DetSolver(BaseSolver):
                 
 
             module = self.ema.module if self.ema else self.model
-            test_stats, coco_evaluator = evaluate(
+            val_stats, val_coco_evaluator = evaluate(
                 module, self.criterion, self.postprocessor, self.val_dataloader, base_ds, self.device, self.output_dir
+            )
+
+            test_stats, test_coco_evaluator = evaluate(
+                module, self.criterion, self.postprocessor, self.test_dataloader, base_ds, self.device, self.output_dir
             )
 
             if self.output_dir:
@@ -62,9 +66,9 @@ class DetSolver(BaseSolver):
                     if self.wandb_logger is not None:
                         self.wandb_logger.upload_checkpoint(str(checkpoint_path))
                 
-                # Save best checkpoint based on mAP
-                if test_stats is not None and 'bbox' in coco_evaluator.coco_eval:
-                    current_map = coco_evaluator.coco_eval['bbox'].stats[0]
+                # Save best checkpoint based on AP
+                if val_stats is not None and 'bbox' in val_coco_evaluator.coco_eval:
+                    current_map = val_coco_evaluator.coco_eval['bbox'].stats[0]
                     if not hasattr(self, 'best_map') or current_map > self.best_map:
                         self.best_map = current_map
                         best_path = self.output_dir / 'checkpoint_best.pth'
@@ -73,13 +77,13 @@ class DetSolver(BaseSolver):
                             self.wandb_logger.upload_checkpoint(str(best_path))
 
             # TODO 
-            for k in test_stats.keys():
+            for k in val_stats.keys():
                 if k in best_stat:
-                    best_stat['epoch'] = epoch if test_stats[k][0] > best_stat[k] else best_stat['epoch']
-                    best_stat[k] = max(best_stat[k], test_stats[k][0])
+                    best_stat['epoch'] = epoch if val_stats[k][0] > best_stat[k] else best_stat['epoch']
+                    best_stat[k] = max(best_stat[k], val_stats[k][0])
                 else:
                     best_stat['epoch'] = epoch
-                    best_stat[k] = test_stats[k][0]
+                    best_stat[k] = val_stats[k][0]
             print('best_stat: ', best_stat)
             
             # Log metrics to wandb
@@ -93,20 +97,21 @@ class DetSolver(BaseSolver):
 
 
                 # Log validation metrics
-                if test_stats is not None:
+                if val_stats is not None:
 
-                    if 'bbox' in coco_evaluator.coco_eval:
-                        bbox_eval = coco_evaluator.coco_eval['bbox']
+                    if 'bbox' in val_coco_evaluator.coco_eval:
+                        bbox_eval = val_coco_evaluator.coco_eval['bbox']
                         stats = bbox_eval.stats
                         
                         # Log mAP at different IoU thresholds
+                        # Todo investigate metrics
                         wandb_coco_stats = {
-                            'Val/mAP': stats[0],  # mAP at IoU=0.50:0.95
-                            'Val/mAP_50': stats[1],  # mAP at IoU=0.50
-                            'Val/mAP_75': stats[2],  # mAP at IoU=0.75
-                            'Val/mAP_small': stats[3],  # mAP for small objects
-                            'Val/mAP_medium': stats[4],  # mAP for medium objects
-                            'Val/mAP_large': stats[5],  # mAP for large objects
+                            'Val/AP': stats[0],
+                            'Val/AP50': stats[1],
+                            'Val/AP75': stats[2],
+                            'Val/AP_small': stats[3],
+                            'Val/AP_medium': stats[4],  # mAP for medium objects
+                            'Val/AP_large': stats[5],  # mAP for large objects
                             'Val/AR_1': stats[6],  # AR at maxDets=1
                             'Val/AR_10': stats[7],  # AR at maxDets=10
                             'Val/AR_100': stats[8],  # AR at maxDets=100
@@ -115,8 +120,33 @@ class DetSolver(BaseSolver):
                             'Val/AR_large': stats[11],  # AR for large objects
                         }
                         self.wandb_logger.log_metrics(wandb_coco_stats, step=epoch)
+                
+                if test_stats is not None:
+
+                    if 'bbox' in test_coco_evaluator.coco_eval:
+                        bbox_eval = test_coco_evaluator.coco_eval['bbox']
+                        stats = bbox_eval.stats
+                        
+                        # Log mAP at different IoU thresholds
+                        # Todo investigate metrics
+                        wandb_coco_stats = {
+                            'Test/AP': stats[0],
+                            'Test/AP50': stats[1],
+                            'Test/AP75': stats[2],
+                            'Test/AP_small': stats[3],
+                            'Test/AP_medium': stats[4],  # mAP for medium objects
+                            'Test/AP_large': stats[5],  # mAP for large objects
+                            'Test/AR_1': stats[6],  # AR at maxDets=1
+                            'Test/AR_10': stats[7],  # AR at maxDets=10
+                            'Test/AR_100': stats[8],  # AR at maxDets=100
+                            'Test/AR_small': stats[9],  # AR for small objects
+                            'Test/AR_medium': stats[10],  # AR for medium objects
+                            'Test/AR_large': stats[11],  # AR for large objects
+                        }
+                        self.wandb_logger.log_metrics(wandb_coco_stats, step=epoch)
 
             log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
+                        **{f'val_{k}': v for k, v in val_stats.items()},
                         **{f'test_{k}': v for k, v in test_stats.items()},
                         'epoch': epoch,
                         'n_parameters': n_parameters}
@@ -127,20 +157,17 @@ class DetSolver(BaseSolver):
                     f.write(json.dumps(log_stats) + "\n")
 
                 # for evaluation logs
-                if coco_evaluator is not None:
+                if val_coco_evaluator is not None:
                     (self.output_dir / 'eval').mkdir(exist_ok=True)
-                    if "bbox" in coco_evaluator.coco_eval:
+                    if "bbox" in val_coco_evaluator.coco_eval:
                         filenames = ['latest.pth']
                         if epoch % 50 == 0:
                             filenames.append(f'{epoch:03}.pth')
                         for name in filenames:
-                            torch.save(coco_evaluator.coco_eval["bbox"].eval,
+                            torch.save(val_coco_evaluator.coco_eval["bbox"].eval,
                                     self.output_dir / "eval" / name)
                                 
-                        
-                            
-
-
+    
         total_time = time.time() - start_time
         total_time_str = str(datetime.timedelta(seconds=int(total_time)))
         print('Training time {}'.format(total_time_str))
@@ -153,11 +180,11 @@ class DetSolver(BaseSolver):
         base_ds = get_coco_api_from_dataset(self.val_dataloader.dataset)
         
         module = self.ema.module if self.ema else self.model
-        test_stats, coco_evaluator = evaluate(module, self.criterion, self.postprocessor,
+        val_stats, val_coco_evaluator = evaluate(module, self.criterion, self.postprocessor,
                 self.val_dataloader, base_ds, self.device, self.output_dir)
                 
         if self.output_dir:
-            dist.save_on_master(coco_evaluator.coco_eval["bbox"].eval, self.output_dir / "eval.pth")
+            dist.save_on_master(val_coco_evaluator.coco_eval["bbox"].eval, self.output_dir / "eval.pth")
 
         self.finish()
         

@@ -68,12 +68,17 @@ class BaseSolver(object):
             shuffle=self.cfg.train_dataloader.shuffle)
         self.val_dataloader = dist.warp_loader(self.cfg.val_dataloader, \
             shuffle=self.cfg.val_dataloader.shuffle)
+        self.test_dataloader = dist.warp_loader(self.cfg.test_dataloader, \
+            shuffle=self.cfg.test_dataloader.shuffle)
 
 
     def eval(self, ):
         self.setup()
         self.val_dataloader = dist.warp_loader(self.cfg.val_dataloader, \
             shuffle=self.cfg.val_dataloader.shuffle)
+        
+        self.test_dataloader = dist.warp_loader(self.cfg.test_dataloader, \
+            shuffle=self.cfg.test_dataloader.shuffle)
 
         if self.cfg.resume:
             print(f'resume from {self.cfg.resume}')
