@@ -52,6 +52,7 @@ class BaseSolver(object):
 
         self.wandb_logger.upload_file(cfg.train_dataloader.dataset.ann_file, base_path=os.path.dirname(cfg.train_dataloader.dataset.ann_file))
         self.wandb_logger.upload_file(cfg.val_dataloader.dataset.ann_file, base_path=os.path.dirname(cfg.val_dataloader.dataset.ann_file))
+        self.wandb_logger.upload_file(cfg.test_dataloader.dataset.ann_file, base_path=os.path.dirname(cfg.test_dataloader.dataset.ann_file))
 
 
     def train(self, ):

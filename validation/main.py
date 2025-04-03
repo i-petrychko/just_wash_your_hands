@@ -97,6 +97,30 @@ def main():
         f"{output_dir}/val",
     )
 
+    # test validation
+    img_paths = extract_image_paths(f"{download_dir}/test.json", imgs_dir=cfg.test_dataloader.dataset.img_folder)
+    predictions = model.predict(img_paths, args.iou_threshold, args.min_confidence)
+    ## save predictions to output directory
+    with open(f"{output_dir}/test/predictions.json", "w") as f:
+        json.dump([prediction.model_dump() for prediction in predictions], f)
+    ## download annotations
+    with open(f"{download_dir}/test.json", "r") as f:
+        data = json.load(f)
+
+    with open(f"{output_dir}/test/predictions.json", "r") as f:
+        predictions = json.load(f)
+    ## convert predictions to ImagePrediction objects
+    predictions = [ImagePrediction.from_dict(prediction) for prediction in predictions]
+    gt_labels = convert_coco_to_image_predictions(data, imgs_dir=cfg.test_dataloader.dataset.img_folder)
+    # run validation
+    validate_predictions(
+        gt_labels,
+        predictions,
+        args.iou_threshold,
+        args.min_confidence,
+        f"{output_dir}/test",
+    )
+
     upload_directory(run_id, cfg.wandb_project_name, cfg.wandb_entity, output_dir)
 
 
