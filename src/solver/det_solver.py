@@ -106,18 +106,19 @@ class DetSolver(BaseSolver):
                         # Log mAP at different IoU thresholds
                         # Todo investigate metrics
                         wandb_coco_stats = {
-                            'Val/AP': stats[0],
-                            'Val/AP50': stats[1],
-                            'Val/AP75': stats[2],
-                            'Val/AP_small': stats[3],
-                            'Val/AP_medium': stats[4],  # mAP for medium objects
-                            'Val/AP_large': stats[5],  # mAP for large objects
-                            'Val/AR_1': stats[6],  # AR at maxDets=1
-                            'Val/AR_10': stats[7],  # AR at maxDets=10
-                            'Val/AR_100': stats[8],  # AR at maxDets=100
-                            'Val/AR_small': stats[9],  # AR for small objects
-                            'Val/AR_medium': stats[10],  # AR for medium objects
-                            'Val/AR_large': stats[11],  # AR for large objects
+                            'Val/mAP@[0.50:0.95]': stats[0],  # Mean Average Precision (IoU=0.50:0.95, averaged over all classes)
+                            'Val/mAP@0.50': stats[1],  # AP at IoU=0.50 (PASCAL VOC metric)
+                            'Val/mAP@0.75': stats[2],  # AP at IoU=0.75 (strict metric)
+                            'Val/mAP_small': stats[3],  # AP for small objects (across all classes)
+                            'Val/mAP_medium': stats[4],  # AP for medium objects (across all classes)
+                            'Val/mAP_large': stats[5],  # AP for large objects (across all classes)
+                            
+                            'Val/mAR@1': stats[6],  # Mean Average Recall at max 1 detection per image
+                            'Val/mAR@10': stats[7],  # Mean Average Recall at max 10 detections per image
+                            'Val/mAR@100': stats[8],  # Mean Average Recall at max 100 detections per image (COCO standard)
+                            'Val/mAR_small': stats[9],  # AR for small objects (across all classes)
+                            'Val/mAR_medium': stats[10],  # AR for medium objects (across all classes)
+                            'Val/mAR_large': stats[11],  # AR for large objects (across all classes)
                         }
                         self.wandb_logger.log_metrics(wandb_coco_stats, step=epoch)
                 
@@ -130,18 +131,19 @@ class DetSolver(BaseSolver):
                         # Log mAP at different IoU thresholds
                         # Todo investigate metrics
                         wandb_coco_stats = {
-                            'Test/AP': stats[0],
-                            'Test/AP50': stats[1],
-                            'Test/AP75': stats[2],
-                            'Test/AP_small': stats[3],
-                            'Test/AP_medium': stats[4],  # mAP for medium objects
-                            'Test/AP_large': stats[5],  # mAP for large objects
-                            'Test/AR_1': stats[6],  # AR at maxDets=1
-                            'Test/AR_10': stats[7],  # AR at maxDets=10
-                            'Test/AR_100': stats[8],  # AR at maxDets=100
-                            'Test/AR_small': stats[9],  # AR for small objects
-                            'Test/AR_medium': stats[10],  # AR for medium objects
-                            'Test/AR_large': stats[11],  # AR for large objects
+                            'Test/mAP@[0.50:0.95]': stats[0],  # Mean Average Precision (IoU=0.50:0.95, averaged over all classes)
+                            'Test/mAP@0.50': stats[1],  # AP at IoU=0.50 (PASCAL VOC metric)
+                            'Test/mAP@0.75': stats[2],  # AP at IoU=0.75 (strict metric)
+                            'Test/mAP_small': stats[3],  # AP for small objects (across all classes)
+                            'Test/mAP_medium': stats[4],  # AP for medium objects (across all classes)
+                            'Test/mAP_large': stats[5],  # AP for large objects (across all classes)
+                            
+                            'Test/mAR@1': stats[6],  # Mean Average Recall at max 1 detection per image
+                            'Test/mAR@10': stats[7],  # Mean Average Recall at max 10 detections per image
+                            'Test/mAR@100': stats[8],  # Mean Average Recall at max 100 detections per image (COCO standard)
+                            'Test/mAR_small': stats[9],  # AR for small objects (across all classes)
+                            'Test/mAR_medium': stats[10],  # AR for medium objects (across all classes)
+                            'Test/mAR_large': stats[11],  # AR for large objects (across all classes)
                         }
                         self.wandb_logger.log_metrics(wandb_coco_stats, step=epoch)
 
