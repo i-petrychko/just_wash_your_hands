@@ -25,6 +25,7 @@ def main():
     os.makedirs(output_dir, exist_ok=True)
     os.makedirs(f"{output_dir}/train", exist_ok=True)
     os.makedirs(f"{output_dir}/val", exist_ok=True)
+    os.makedirs(f"{output_dir}/test", exist_ok=True)
 
     run_id = get_run_id(args.model_config)
     download_dir = f"{run_id}_files"
