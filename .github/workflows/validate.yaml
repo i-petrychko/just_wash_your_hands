@@ -138,7 +138,13 @@ jobs:
           wandb login $WANDB_KEY
 
           echo "Pulling data..."
+          dvc pull checkpoints
           dvc pull data
+
+          python pipelines/generate_config.py -c ${{ github.event.inputs.config_name }}
+          python3 pipelines/split.py
+          python3 pipelines/filter.py
+          python3 pipelines/convert_to_coco.py
 
           echo "Running validation..."
           python validation/main.py --model_config recipes/${{ github.event.inputs.config_name }}.yml --iou_threshold ${{ inputs.iou_threshold }} --min_confidence ${{ inputs.min_confidence }}

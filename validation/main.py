@@ -46,6 +46,9 @@ def main():
     download_file(
         run_id, cfg.wandb_project_name, cfg.wandb_entity, "val.json", download_dir
     )
+    download_file(
+        run_id, cfg.wandb_project_name, cfg.wandb_entity, "test.json", download_dir
+    )
 
     model = RTDETRModel(args.model_config, f"{download_dir}/{cfg.output_dir}/checkpoint_best.pth")
 
