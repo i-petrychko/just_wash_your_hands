@@ -1,0 +1,96 @@
+__include__: [
+  'dataset/icip_detection.yml',
+  'runtime/runtime.yml',
+  'include/dataloader.yml',
+  'include/optimizer.yml',
+  'include/rtdetr_r50vd.yml',
+  'preprocessing/default.yml'
+]
+
+PResNet:
+  depth: 18
+  freeze_at: -1
+  freeze_norm: False
+  pretrained: True
+
+HybridEncoder:
+  in_channels: [128, 256, 512]
+  hidden_dim: 256
+  expansion: 0.5
+
+
+RTDETRTransformer:
+  eval_idx: -1
+  num_decoder_layers: 3
+  num_denoising: 100
+
+
+
+optimizer:
+  type: AdamW
+  params: 
+    - 
+      params: '^(?=.*backbone)(?=.*norm).*$'
+      lr: 0.00001
+      weight_decay: 0.
+    - 
+      params: '^(?=.*backbone)(?!.*norm).*$'
+      lr: 0.00001
+    - 
+      params: '^(?=.*(?:encoder|decoder))(?=.*(?:norm|bias)).*$'
+      weight_decay: 0.
+
+  lr: 0.0001
+  betas: [0.9, 0.999]
+  weight_decay: 0.0001
+
+
+paths:
+  dataset_path: "data/icip"
+  out_path: "run"
+
+train_dataloader: 
+  dataset: 
+    img_folder: .
+    ann_file: ./run/coco/annotations/train.json
+
+val_dataloader:
+  dataset: 
+    img_folder: .
+    ann_file: ./run/coco/annotations/val.json
+  drop_last: False
+
+test_dataloader:
+  dataset: 
+    img_folder: .
+    ann_file: ./run/coco/annotations/test.json
+  drop_last: False
+
+SetCriterion:
+  weight_dict: {loss_vfl: 3, loss_bbox: 5, loss_giou: 2}
+  losses: ['vfl', 'boxes', ]
+  alpha: 0.75
+  gamma: 2.0
+
+  matcher:
+    type: HungarianMatcher
+    weight_dict: {cost_class: 3, cost_bbox: 5, cost_giou: 2}
+    # use_focal_loss: True 
+    alpha: 0.25
+    gamma: 2.0
+
+lr_scheduler:
+  type: MultiStepLR
+  milestones: [10]
+  gamma: 0.7
+
+
+wandb:
+  project_name: RT-DETR
+  entity: petrychko-vitalii-ukrainian-catholic-university
+  name: r18vd_multistepLR
+
+checkpoint_step: 50
+seed: 1
+
+epoches: 100

@@ -25,7 +25,8 @@ class DetSolver(BaseSolver):
         n_parameters = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
         print('number of params:', n_parameters)
 
-        base_ds = get_coco_api_from_dataset(self.val_dataloader.dataset)
+        base_val_ds = get_coco_api_from_dataset(self.val_dataloader.dataset)
+        base_test_ds = get_coco_api_from_dataset(self.test_dataloader.dataset)
         # best_stat = {'coco_eval_bbox': 0, 'coco_eval_masks': 0, 'epoch': -1, }
         best_stat = {'epoch': -1, }
 
@@ -44,11 +45,11 @@ class DetSolver(BaseSolver):
 
             module = self.ema.module if self.ema else self.model
             val_stats, val_coco_evaluator = evaluate(
-                module, self.criterion, self.postprocessor, self.val_dataloader, base_ds, self.device, self.output_dir
+                module, self.criterion, self.postprocessor, self.val_dataloader, base_val_ds, self.device, self.output_dir
             )
 
             test_stats, test_coco_evaluator = evaluate(
-                module, self.criterion, self.postprocessor, self.test_dataloader, base_ds, self.device, self.output_dir
+                module, self.criterion, self.postprocessor, self.test_dataloader, base_test_ds, self.device, self.output_dir
             )
 
             if self.output_dir:

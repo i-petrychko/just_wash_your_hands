@@ -1,0 +1,59 @@
+__include__: [
+  'dataset/icip_detection.yml',
+  'runtime/runtime.yml',
+  'include/dataloader.yml',
+  'include/optimizer.yml',
+  'include/rtdetr_r50vd.yml',
+  'preprocessing/default.yml'
+]
+
+output_dir: ./run_output
+paths:
+  dataset_path: "data/icip"
+  out_path: "run"
+
+train_dataloader: 
+  dataset: 
+    img_folder: .
+    ann_file: ./run/coco/annotations/train.json
+
+val_dataloader:
+  dataset: 
+    img_folder: .
+    ann_file: ./run/coco/annotations/val.json
+  drop_last: False
+
+test_dataloader:
+  dataset: 
+    img_folder: .
+    ann_file: ./run/coco/annotations/test.json
+  drop_last: False
+
+SetCriterion:
+  weight_dict: {loss_vfl: 3, loss_bbox: 5, loss_giou: 2}
+  losses: ['vfl', 'boxes', ]
+  alpha: 0.75
+  gamma: 2.0
+
+  matcher:
+    type: HungarianMatcher
+    weight_dict: {cost_class: 3, cost_bbox: 5, cost_giou: 2}
+    # use_focal_loss: True 
+    alpha: 0.25
+    gamma: 2.0
+
+lr_scheduler:
+  type: MultiStepLR
+  milestones: [10]
+  gamma: 0.7
+
+
+wandb:
+  project_name: RT-DETR
+  entity: petrychko-vitalii-ukrainian-catholic-university
+  name: r50vd_multistepLR
+
+checkpoint_step: 50
+seed: 1
+
+epoches: 100
