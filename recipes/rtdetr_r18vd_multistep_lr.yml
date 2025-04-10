@@ -49,6 +49,8 @@ paths:
   dataset_path: "data/icip"
   out_path: "run"
 
+output_dir: ./logs
+
 train_dataloader: 
   dataset: 
     img_folder: .
